@@ -1,4 +1,4 @@
-import { useParams, Link, NavLink } from "react-router-dom";
+import { useParams, Link, NavLink, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useCardGame } from "../../../hook/useCardGames";
 import { useVersionList, addVersion } from "../../../hook/useVersions";
@@ -8,6 +8,7 @@ import "../CSS/Kaitori.css"; // 同じスタイルを流用（Gridなど）
 export default function CardGameDetailPage() {
   const { id } = useParams(); // ← 親の CardGameID
   const { item: game, loading: gameLoading } = useCardGame(id);
+  const navigate = useNavigate();
 
   // game?.name が取れたら、その名前で Version を購読
   const { items, loading, err } = useVersionList(game?.name);
