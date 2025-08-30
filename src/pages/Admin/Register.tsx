@@ -11,7 +11,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
-  const [showPassword, setShowPassword] = useState(false);          // ← パスワード表示切替
+  const [showPassword, setShowPassword] = useState(false); // ← パスワード表示切替
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {

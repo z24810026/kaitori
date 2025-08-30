@@ -1,0 +1,122 @@
+/* ===== 基礎 Reset：移除所有預設留白 ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 字體與平滑（可依喜好調整） */
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 圖片與表單元素預設處理 */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* 段落與標題不要額外外距造成縫隙 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+/* 讓 App 框架撐滿 */
+#root {
+  display: flex; /* 撐滿整個視窗 */
+  min-height: 100vh;
+}
+
+/* ===== Admin 相關：移除右側內容的留白，做到真正滿版 ===== */
+.admin-root {
+  /* 你的 AdminLayout 外框：確保無外距 */
+  margin: 0 !important;
+  min-height: 100vh; /* 讓版面至少撐滿視窗高度 */
+}
+
+.admin-content {
+  /* 右側主內容區：預設有 padding 的話直接拿掉 */
+  padding: 0 !important;
+}
+
+/* （選）清單/頁面常見容器也去除留白 */
+.page,
+.kaitori-wrap {
+  padding: 0 !important;
+}
+
+/* 讓連結沒有預設下劃線與顏色可自訂 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* （選）卷軸美化：不想要可以刪掉 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toast-viewport{
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  gap: 10px;
+  z-index: 10000;
+}
+.toast{
+  min-width: 240px;
+  max-width: 420px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .02em;
+  animation: toast-in .2s ease-out;
+}
+.toast--success { background: #16a34a; }
+.toast--error   { background: #dc2626; }
+.toast--info    { background: #2563eb; }
+.toast--warning { background: #d97706; }
+.toast-msg{ display:inline-block; white-space:pre-wrap; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

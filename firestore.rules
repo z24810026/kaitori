@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 例：所有文件允許已登入者讀取
+    match /{document=**} {
+      allow read: if request.auth != null;
+    }
+
+    // 例：CardGame_Version_Table 只有登入者才可寫入
+    match /CardGame_Version_Table/{docId} {
+      allow create, update, delete: if request.auth != null;
+      allow read: if request.auth != null;
+    }
+  }
+}

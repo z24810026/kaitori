@@ -27,8 +27,8 @@ export default function AdminLogin() {
 
   return (
     <div className="login-container">
-      {loading && <LoadingOverlay message="ログイン中です…" />} {/* ← ローディング */}
-
+      {loading && <LoadingOverlay message="ログイン中です…" />}{" "}
+      {/* ← ローディング */}
       <h2>管理者ログイン</h2>
       <form onSubmit={onSubmit}>
         <div className="form-group">
@@ -62,7 +62,6 @@ export default function AdminLogin() {
           ログイン
         </button>
       </form>
-
       {/* 新規登録ボタン */}
       <div style={{ marginTop: "16px" }}>
         <button

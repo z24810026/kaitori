@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import type { ReactNode } from "react";   
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import {
@@ -59,7 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout /*, isAdmin*/ }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, logout /*, isAdmin*/ }}
+    >
       {children}
     </AuthContext.Provider>
   );

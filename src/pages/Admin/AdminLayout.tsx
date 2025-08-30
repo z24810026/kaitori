@@ -23,7 +23,9 @@ export default function AdminLayout() {
         <nav className="admin-nav">
           <NavLink
             to="/admin/kaitori"
-            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+            className={({ isActive }) =>
+              "nav-item" + (isActive ? " active" : "")
+            }
           >
             <i className="bx bx-card"></i>
             <span>買取表</span>
@@ -31,7 +33,9 @@ export default function AdminLayout() {
 
           <NavLink
             to="/admin/settings"
-            className={({ isActive }) => "nav-item" + (isActive ? " active" : "")}
+            className={({ isActive }) =>
+              "nav-item" + (isActive ? " active" : "")
+            }
           >
             <i className="bx bx-cog"></i>
             <span>セッティング</span>

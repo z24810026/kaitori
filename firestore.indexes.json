@@ -1,0 +1,132 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "CardGame_Version_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" }
+      ]
+    },
+
+    {
+      "collectionGroup": "CardKyara_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "cardKyaraName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardKyara_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" }
+      ]
+    },
+
+    {
+      "collectionGroup": "CardType_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "cardTypeName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardType_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" }
+      ]
+    },
+
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "cardName", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "cardKyara", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "cardType", "order": "ASCENDING" }
+      ]
+    },
+
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "storePrice", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "storePrice", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "minPrice", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "minPrice", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "wantedQty", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "CardInfo_Table",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "cardGameName", "order": "ASCENDING" },
+        { "fieldPath": "versionName", "order": "ASCENDING" },
+        { "fieldPath": "wantedQty", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

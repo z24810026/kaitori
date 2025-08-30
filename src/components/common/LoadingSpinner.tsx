@@ -2,9 +2,9 @@ import type { CSSProperties } from "react";
 import "./loading.css";
 
 type Props = {
-  size?: number;          // 直徑 px
-  thickness?: number;     // 線寬 px
-  label?: string;         // アクセシビリティ用ラベル
+  size?: number; // 直徑 px
+  thickness?: number; // 線寬 px
+  label?: string; // アクセシビリティ用ラベル
   style?: CSSProperties;
   className?: string;
 };

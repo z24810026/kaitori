@@ -26,8 +26,12 @@
   background: #f3f4f6;
 }
 
-.brand-logo { font-size: 20px; }
-.brand-name { font-size: 16px; }
+.brand-logo {
+  font-size: 20px;
+}
+.brand-name {
+  font-size: 16px;
+}
 
 .admin-nav {
   display: flex;
@@ -50,8 +54,12 @@
   font: inherit;
 }
 
-.nav-item i { font-size: 18px; }
-.nav-item:hover { background: #f5f7fb; }
+.nav-item i {
+  font-size: 18px;
+}
+.nav-item:hover {
+  background: #f5f7fb;
+}
 .nav-item.active {
   background: #e9efff;
   color: #0b5cff;
@@ -69,16 +77,20 @@
 .admin-user {
   margin-top: auto;
   padding: 10px 12px;
+  border: none;
   border-radius: 10px;
-  background: #f8fafc;
+  background: white;
   color: #4b5563;
   font-size: 12px;
 }
-.user-mail { font-weight: 600; margin-bottom: 4px; }
+.user-mail {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
 
 /* ===== Main content ===== */
 .admin-content {
-  padding: 24px;
+  padding: 12px;
 }
 
 .page h1 {
