@@ -30,7 +30,11 @@ export default function CardDetailPage() {
   const isBusy = pending > 0;
   const runWithLoading = useCallback(async <T,>(fn: () => Promise<T>) => {
     setPending((n) => n + 1);
-    try { return await fn(); } finally { setPending((n) => Math.max(0, n - 1)); }
+    try {
+      return await fn();
+    } finally {
+      setPending((n) => Math.max(0, n - 1));
+    }
   }, []);
 
   // 原始資料
@@ -84,10 +88,10 @@ export default function CardDetailPage() {
   }, [cid, id, vid, navigate, toast]);
 
   const cardGameName = orig?.cardGameName ?? "";
-  const versionName  = orig?.versionName  ?? "";
+  const versionName = orig?.versionName ?? "";
 
   const kyaraOptions = useKyaraOptions(cardGameName, versionName);
-  const typeOptions  = useTypeOptions(cardGameName, versionName);
+  const typeOptions = useTypeOptions(cardGameName, versionName);
 
   // 換圖預覽
   useEffect(() => {
@@ -102,25 +106,46 @@ export default function CardDetailPage() {
     return (
       orig.cardName !== cardName ||
       (orig.cardKyara ?? "") !== (cardKyara ?? "") ||
-      (orig.cardType ?? "")  !== (cardType ?? "") ||
+      (orig.cardType ?? "") !== (cardType ?? "") ||
       (orig.storePrice ?? "") !== (storePrice === "" ? "" : storePrice) ||
-      (orig.minPrice ?? "")   !== (minPrice === "" ? "" : minPrice) ||
-      (orig.wantedQty ?? "")  !== (wantedQty === "" ? "" : wantedQty) ||
+      (orig.minPrice ?? "") !== (minPrice === "" ? "" : minPrice) ||
+      (orig.wantedQty ?? "") !== (wantedQty === "" ? "" : wantedQty) ||
       !!photoFile
     );
-  }, [orig, cardName, cardKyara, cardType, storePrice, minPrice, wantedQty, photoFile]);
+  }, [
+    orig,
+    cardName,
+    cardKyara,
+    cardType,
+    storePrice,
+    minPrice,
+    wantedQty,
+    photoFile,
+  ]);
 
   const validate = () => {
     if (!orig) return false;
-    if (!cardName.trim()) { toast.error("カード名を入力してください。"); return false; }
-    if (storePrice !== "" && (isNaN(Number(storePrice)) || Number(storePrice) < 0)) {
-      toast.error("店頭買取価格は0以上の数値で入力してください。"); return false;
+    if (!cardName.trim()) {
+      toast.error("カード名を入力してください。");
+      return false;
+    }
+    if (
+      storePrice !== "" &&
+      (isNaN(Number(storePrice)) || Number(storePrice) < 0)
+    ) {
+      toast.error("店頭買取価格は0以上の数値で入力してください。");
+      return false;
     }
     if (minPrice !== "" && (isNaN(Number(minPrice)) || Number(minPrice) < 0)) {
-      toast.error("最低買取価格は0以上の数値で入力してください。"); return false;
+      toast.error("最低買取価格は0以上の数値で入力してください。");
+      return false;
     }
-    if (wantedQty !== "" && (isNaN(Number(wantedQty)) || Number(wantedQty) < 0)) {
-      toast.error("募集枚数は0以上の数値で入力してください。"); return false;
+    if (
+      wantedQty !== "" &&
+      (isNaN(Number(wantedQty)) || Number(wantedQty) < 0)
+    ) {
+      toast.error("募集枚数は0以上の数値で入力してください。");
+      return false;
     }
     return true;
   };
@@ -134,7 +159,10 @@ export default function CardDetailPage() {
         let photoDownloadURL: string | undefined;
         if (photoFile) {
           // 上傳新圖
-          const safe = cardName.trim().replace(/[^\w\-一-龥ぁ-んァ-ン]/g, "_").slice(0, 60);
+          const safe = cardName
+            .trim()
+            .replace(/[^\w\-一-龥ぁ-んァ-ン]/g, "_")
+            .slice(0, 60);
           const path = `cardImages/${orig.cardGameName}/${orig.versionName}/${safe}_${Date.now()}.jpg`;
           photoDownloadURL = await uploadImageAndGetURL(photoFile, path);
         }
@@ -142,10 +170,10 @@ export default function CardDetailPage() {
         const payload: Partial<CardDoc> = {
           cardName: cardName.trim(),
           cardKyara: cardKyara || undefined,
-          cardType:  cardType  || undefined,
+          cardType: cardType || undefined,
           storePrice: typeof storePrice === "number" ? storePrice : undefined,
-          minPrice:   typeof minPrice   === "number" ? minPrice   : undefined,
-          wantedQty:  typeof wantedQty  === "number" ? wantedQty  : undefined,
+          minPrice: typeof minPrice === "number" ? minPrice : undefined,
+          wantedQty: typeof wantedQty === "number" ? wantedQty : undefined,
           ...(photoDownloadURL ? { cardPhoto: photoDownloadURL } : {}),
         };
 
@@ -153,7 +181,7 @@ export default function CardDetailPage() {
         toast.success("更新しました。");
         setPhotoFile(null);
         if (photoDownloadURL) setPhotoPreview(photoDownloadURL);
-        setOrig((o) => (o ? { ...o, ...payload } as CardDoc : o));
+        setOrig((o) => (o ? ({ ...o, ...payload } as CardDoc) : o));
       } catch (e) {
         console.error(e);
         toast.error("更新に失敗しました。");
@@ -178,7 +206,10 @@ export default function CardDetailPage() {
 
   if (loading || !orig) {
     return (
-      <div className="page" style={{ display: "grid", placeItems: "center", minHeight: "60vh" }}>
+      <div
+        className="page"
+        style={{ display: "grid", placeItems: "center", minHeight: "60vh" }}
+      >
         <LoadingSpinner />
       </div>
     );
@@ -187,27 +218,54 @@ export default function CardDetailPage() {
   return (
     <div className="page">
       <div className="page-head">
-        <Link to={`/admin/kaitori/${id}/version/${vid}`} style={{ color: "#0b5cff" }}>
+        <Link
+          to={`/admin/kaitori/${id}/version/${vid}`}
+          style={{ color: "#0b5cff" }}
+        >
           ← カード一覧へ戻る
         </Link>
-        <h1 style={{ marginTop: 8 }}>{orig.versionName} / {orig.cardName}</h1>
+        <h1 style={{ marginTop: 8 }}>
+          {orig.versionName} / {orig.cardName}
+        </h1>
         <div className="page-actions">
-          <button className="ghost" onClick={remove}>削除</button>
-          <button className="primary" onClick={save} disabled={!changed}>保存</button>
+          <button className="ghost" onClick={remove}>
+            削除
+          </button>
+          <button className="primary" onClick={save} disabled={!changed}>
+            保存
+          </button>
         </div>
       </div>
 
       <div className="modal-80" style={{ margin: 0 }}>
-        <div className="card-form" style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 24 }}>
+        <div
+          className="card-form"
+          style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: 24 }}
+        >
           {/* 左側：圖片 */}
           <div className="card-form-left">
-            <div className="imgbox">{photoPreview ? <img src={photoPreview} alt="preview" /> : <div className="img-empty">画像プレビュー</div>}</div>
-            <label className="file-btn">画像を選択
-              <input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} hidden />
+            <div className="imgbox">
+              {photoPreview ? (
+                <img src={photoPreview} alt="preview" />
+              ) : (
+                <div className="img-empty">画像プレビュー</div>
+              )}
+            </div>
+            <label className="file-btn">
+              画像を選択
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+                hidden
+              />
             </label>
             {orig.cardPhoto && (
               <div style={{ marginTop: 8, fontSize: 12, color: "#666" }}>
-                現在のURL：<a href={orig.cardPhoto} target="_blank" rel="noreferrer">開く</a>
+                現在のURL：
+                <a href={orig.cardPhoto} target="_blank" rel="noreferrer">
+                  開く
+                </a>
               </div>
             )}
           </div>
@@ -216,34 +274,75 @@ export default function CardDetailPage() {
           <div className="card-form-right">
             <div className="form-row">
               <label>カード名</label>
-              <input value={cardName} onChange={(e) => setCardName(e.target.value)} />
+              <input
+                value={cardName}
+                onChange={(e) => setCardName(e.target.value)}
+              />
             </div>
 
             <div className="form-row">
               <label>キャラクター</label>
               {!addingKyara ? (
                 <div className="row-inline">
-                  <select value={cardKyara} onChange={(e) => setCardKyara(e.target.value)}>
+                  <select
+                    value={cardKyara}
+                    onChange={(e) => setCardKyara(e.target.value)}
+                  >
                     <option value="">（未選択）</option>
-                    {kyaraOptions.map(k => <option key={k.id} value={k.cardKyaraName}>{k.cardKyaraName}</option>)}
+                    {kyaraOptions.map((k) => (
+                      <option key={k.id} value={k.cardKyaraName}>
+                        {k.cardKyaraName}
+                      </option>
+                    ))}
                   </select>
-                  <button type="button" className="mini-btn" onClick={() => setAddingKyara(true)}>＋ 新規追加</button>
+                  <button
+                    type="button"
+                    className="mini-btn"
+                    onClick={() => setAddingKyara(true)}
+                  >
+                    ＋ 新規追加
+                  </button>
                 </div>
               ) : (
                 <div className="row-inline">
-                  <input value={newKyaraName} onChange={(e) => setNewKyaraName(e.target.value)} placeholder="キャラクター名を入力" />
+                  <input
+                    value={newKyaraName}
+                    onChange={(e) => setNewKyaraName(e.target.value)}
+                    placeholder="キャラクター名を入力"
+                  />
                   <button
                     type="button"
                     className="mini-btn primary"
                     onClick={async () => {
-                      if (!newKyaraName.trim()) { toast.error("キャラクター名を入力してください。"); return; }
-                      await runWithLoading(() => addKyara(cardGameName, versionName, newKyaraName.trim()));
+                      if (!newKyaraName.trim()) {
+                        toast.error("キャラクター名を入力してください。");
+                        return;
+                      }
+                      await runWithLoading(() =>
+                        addKyara(
+                          cardGameName,
+                          versionName,
+                          newKyaraName.trim(),
+                        ),
+                      );
                       toast.success("キャラクターを追加しました。");
                       setCardKyara(newKyaraName.trim());
-                      setNewKyaraName(""); setAddingKyara(false);
+                      setNewKyaraName("");
+                      setAddingKyara(false);
                     }}
-                  >追加</button>
-                  <button type="button" className="mini-btn" onClick={() => { setAddingKyara(false); setNewKyaraName(""); }}>キャンセル</button>
+                  >
+                    追加
+                  </button>
+                  <button
+                    type="button"
+                    className="mini-btn"
+                    onClick={() => {
+                      setAddingKyara(false);
+                      setNewKyaraName("");
+                    }}
+                  >
+                    キャンセル
+                  </button>
                 </div>
               )}
             </div>
@@ -252,51 +351,123 @@ export default function CardDetailPage() {
               <label>種類</label>
               {!addingType ? (
                 <div className="row-inline">
-                  <select value={cardType} onChange={(e) => setCardType(e.target.value)}>
+                  <select
+                    value={cardType}
+                    onChange={(e) => setCardType(e.target.value)}
+                  >
                     <option value="">（未選択）</option>
-                    {typeOptions.map(t => <option key={t.id} value={t.cardTypeName}>{t.cardTypeName}</option>)}
+                    {typeOptions.map((t) => (
+                      <option key={t.id} value={t.cardTypeName}>
+                        {t.cardTypeName}
+                      </option>
+                    ))}
                   </select>
-                  <button type="button" className="mini-btn" onClick={() => setAddingType(true)}>＋ 新規追加</button>
+                  <button
+                    type="button"
+                    className="mini-btn"
+                    onClick={() => setAddingType(true)}
+                  >
+                    ＋ 新規追加
+                  </button>
                 </div>
               ) : (
                 <div className="row-inline">
-                  <input value={newTypeName} onChange={(e) => setNewTypeName(e.target.value)} placeholder="種類名を入力" />
+                  <input
+                    value={newTypeName}
+                    onChange={(e) => setNewTypeName(e.target.value)}
+                    placeholder="種類名を入力"
+                  />
                   <button
-                    type="button" className="mini-btn primary"
+                    type="button"
+                    className="mini-btn primary"
                     onClick={async () => {
-                      if (!newTypeName.trim()) { toast.error("種類名を入力してください。"); return; }
-                      await runWithLoading(() => addType(cardGameName, versionName, newTypeName.trim()));
+                      if (!newTypeName.trim()) {
+                        toast.error("種類名を入力してください。");
+                        return;
+                      }
+                      await runWithLoading(() =>
+                        addType(cardGameName, versionName, newTypeName.trim()),
+                      );
                       toast.success("種類を追加しました。");
                       setCardType(newTypeName.trim());
-                      setNewTypeName(""); setAddingType(false);
+                      setNewTypeName("");
+                      setAddingType(false);
                     }}
-                  >追加</button>
-                  <button type="button" className="mini-btn" onClick={() => { setAddingType(false); setNewTypeName(""); }}>キャンセル</button>
+                  >
+                    追加
+                  </button>
+                  <button
+                    type="button"
+                    className="mini-btn"
+                    onClick={() => {
+                      setAddingType(false);
+                      setNewTypeName("");
+                    }}
+                  >
+                    キャンセル
+                  </button>
                 </div>
               )}
             </div>
 
             <div className="form-row">
               <label>店頭買取価格</label>
-              <input type="number" value={storePrice}
-                onChange={(e) => setStorePrice(e.target.value === "" ? "" : Number(e.target.value))} min={0} />
+              <input
+                type="number"
+                value={storePrice}
+                onChange={(e) =>
+                  setStorePrice(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                min={0}
+              />
             </div>
 
             <div className="form-row">
               <label>最低買取価格</label>
-              <input type="number" value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))} min={0} />
+              <input
+                type="number"
+                value={minPrice}
+                onChange={(e) =>
+                  setMinPrice(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                min={0}
+              />
             </div>
 
             <div className="form-row">
               <label>募集枚数</label>
-              <input type="number" value={wantedQty}
-                onChange={(e) => setWantedQty(e.target.value === "" ? "" : Number(e.target.value))} min={0} />
+              <input
+                type="number"
+                value={wantedQty}
+                onChange={(e) =>
+                  setWantedQty(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                min={0}
+              />
             </div>
 
             <div className="form-actions" style={{ gap: 12 }}>
-              <button className="ghost" type="button" onClick={() => navigate(-1)}>戻る</button>
-              <button className="primary" type="button" onClick={save} disabled={!changed}>保存</button>
+              <button
+                className="ghost"
+                type="button"
+                onClick={() => navigate(-1)}
+              >
+                戻る
+              </button>
+              <button
+                className="primary"
+                type="button"
+                onClick={save}
+                disabled={!changed}
+              >
+                保存
+              </button>
             </div>
           </div>
         </div>
@@ -304,14 +475,29 @@ export default function CardDetailPage() {
 
       {/* 全畫面 Loading */}
       {isBusy && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,.35)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 9999, backdropFilter: "blur(2px)"
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,.35)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            backdropFilter: "blur(2px)",
+          }}
+        >
           <div style={{ display: "grid", placeItems: "center", gap: 12 }}>
             <LoadingSpinner />
-            <div style={{ color: "#fff", fontWeight: 700, textShadow: "0 1px 2px rgba(0,0,0,.4)" }}>処理中…</div>
+            <div
+              style={{
+                color: "#fff",
+                fontWeight: 700,
+                textShadow: "0 1px 2px rgba(0,0,0,.4)",
+              }}
+            >
+              処理中…
+            </div>
           </div>
         </div>
       )}

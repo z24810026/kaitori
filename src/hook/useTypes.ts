@@ -30,7 +30,7 @@ export function useTypeOptions(cardGameName?: string, versionName?: string) {
       collection(db, TYPE_COLLECTION),
       where("cardGameName", "==", cardGameName),
       where("versionName", "==", versionName),
-      orderBy("cardTypeName", "asc")
+      orderBy("cardTypeName", "asc"),
     );
     return onSnapshot(q, (snap) => {
       setItems(
@@ -39,7 +39,7 @@ export function useTypeOptions(cardGameName?: string, versionName?: string) {
           cardGameName: d.get("cardGameName"),
           versionName: d.get("versionName"),
           cardTypeName: d.get("cardTypeName"),
-        }))
+        })),
       );
     });
   }, [cardGameName, versionName]);
@@ -49,7 +49,7 @@ export function useTypeOptions(cardGameName?: string, versionName?: string) {
 export async function addType(
   cardGameName: string,
   versionName: string,
-  cardTypeName: string
+  cardTypeName: string,
 ) {
   await addDoc(collection(db, TYPE_COLLECTION), {
     cardGameName,

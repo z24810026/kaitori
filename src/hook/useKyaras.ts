@@ -30,7 +30,7 @@ export function useKyaraOptions(cardGameName?: string, versionName?: string) {
       collection(db, KYARA_COLLECTION),
       where("cardGameName", "==", cardGameName),
       where("versionName", "==", versionName),
-      orderBy("cardKyaraName", "asc")
+      orderBy("cardKyaraName", "asc"),
     );
     return onSnapshot(q, (snap) => {
       setItems(
@@ -39,7 +39,7 @@ export function useKyaraOptions(cardGameName?: string, versionName?: string) {
           cardGameName: d.get("cardGameName"),
           versionName: d.get("versionName"),
           cardKyaraName: d.get("cardKyaraName"),
-        }))
+        })),
       );
     });
   }, [cardGameName, versionName]);
@@ -49,7 +49,7 @@ export function useKyaraOptions(cardGameName?: string, versionName?: string) {
 export async function addKyara(
   cardGameName: string,
   versionName: string,
-  cardKyaraName: string
+  cardKyaraName: string,
 ) {
   await addDoc(collection(db, KYARA_COLLECTION), {
     cardGameName,

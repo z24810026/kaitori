@@ -1,7 +1,7 @@
 /* =========================
    全域流動變數（字級、間距）
    ========================= */
-:root{
+:root {
   --gutter: clamp(8px, 2vw, 16px);
   --radius: 12px;
 
@@ -10,13 +10,15 @@
 
   /* 用 vw 為主，視窗變窄時同步縮小 */
   --fs-base: clamp(11px, 0.9vw, 15px);
-  --fs-sm:   clamp(10px, 0.75vw, 13px);
-  --fs-lg:   clamp(13px, 1.1vw, 18px);
+  --fs-sm: clamp(10px, 0.75vw, 13px);
+  --fs-lg: clamp(13px, 1.1vw, 18px);
 
-  /* ===== 卡片四區固定高度（隨字級等比） ===== */
-  --h-name:  clamp(18px, 1.6em, 28px);   /* 單行名稱區 */
-  --h-price: clamp(72px, 6.5em, 110px);  /* 價格區可放 2~3 行 */
-  --h-note:  clamp(16px, 1.4em, 24px);   /* 補充單行 */
+  /* ===== 卡片區塊高度（隨字級等比） ===== */
+  --h-name: clamp(18px, 1.6em, 28px); /* 單行名稱 */
+  --h-price: clamp(72px, 6.5em, 110px); /* 價格兩行 */
+  --h-note: clamp(16px, 1.4em, 24px); /* 補充一行 */
+  /* 價格＋補充的總高度（DOM 中 wanted 在 price-block 內） */
+  --h-price-plus-note: calc(var(--h-price) + var(--h-note));
 }
 
 /* =========================
@@ -34,318 +36,626 @@
   flex-wrap: wrap;
   gap: var(--gutter);
 }
-.kaitori-head h1 { margin: 0; font-size: var(--fs-lg); }
+.kaitori-head h1 {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
 
 /* =========================
    頁首右上動作區
    ========================= */
-.page { position: relative; }
-.page-head { position: relative; }
+.page {
+  position: relative;
+}
+.page-head {
+  position: relative;
+}
 .page-actions {
   width: min(50%, 640px);
   height: 100%;
   position: absolute;
-  top: 0; right: 0;
+  top: 0;
+  right: 0;
   display: flex;
   flex-direction: row;
   justify-content: end;
   align-items: center;
   gap: var(--gutter);
 }
-.page-actions .ghost{
-  border: 1px solid red; color: red;
-  transition: all .3s ease ;
+.page-actions .ghost {
+  border: 1px solid red;
+  color: red;
+  transition: all 0.3s ease;
 }
-.page-actions .ghost:hover{ background-color: red; color: white; }
-.page-actions button{
-  width: auto; height: auto;
-  padding: .6em 1em;
-  border: 1px solid black; background-color: white; border-radius: 30px;
+.page-actions .ghost:hover {
+  background-color: red;
+  color: #fff;
+}
+.page-actions button {
+  width: auto;
+  height: auto;
+  padding: 0.6em 1em;
+  border: 1px solid black;
+  background: #fff;
+  border-radius: 30px;
   font-size: var(--fs-base);
   min-width: clamp(104px, 24vw, 180px);
 }
-@media (max-width: 768px){
-  .page-actions{
-    position: static; width: 100%; height: auto;
-    justify-content: flex-start; gap: var(--gutter); margin-top: 4px;
+@media (max-width: 768px) {
+  .page-actions {
+    position: static;
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    gap: var(--gutter);
+    margin-top: 4px;
   }
 }
 
 /* =========================
    頂部 actions（新增等）
    ========================= */
-.actions{
-  display:flex; justify-content:center; align-items:center;
-  gap: var(--gutter); flex-wrap: wrap;
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--gutter);
+  flex-wrap: wrap;
 }
-.actions .add-btn{
-  display:inline-flex; align-items:center; gap:6px;
-  background:#0753a6; color:#fff; border:0; border-radius:10px;
+.actions .add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #0753a6;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
   padding: clamp(6px, 1.2vw, 10px) clamp(10px, 2vw, 14px);
-  cursor:pointer; font-size:var(--fs-base);
+  cursor: pointer;
+  font-size: var(--fs-base);
 }
-.actions .add-btn:hover{ background:#05498c; }
+.actions .add-btn:hover {
+  background: #05498c;
+}
 
 /* =========================
    新增表單
    ========================= */
-.add-form{
-  background:#fff; border:1px solid #eceff4; border-radius:12px; padding:14px;
+.add-form {
+  background: #fff;
+  border: 1px solid #eceff4;
+  border-radius: 12px;
+  padding: 14px;
 }
-.add-form label{ font-size:var(--fs-sm); color:#555; }
-.add-form .row{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
-.add-form input{
-  flex:1 1 220px; min-width:0;
-  border:1px solid #d8dee9; border-radius:8px; padding:8px 10px;
-  font-size:var(--fs-base);
+.add-form label {
+  font-size: var(--fs-sm);
+  color: #555;
 }
-.add-form button{
-  background:#0b5cff; color:#fff; border:0; border-radius:8px;
-  padding:8px 14px; cursor:pointer; font-size:var(--fs-base);
+.add-form .row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
 }
-.add-form .msg{ margin-top:6px; font-size:var(--fs-sm); color:#16a34a; }
-.error{ color:#d33; }
+.add-form input {
+  flex: 1 1 220px;
+  min-width: 0;
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: var(--fs-base);
+}
+.add-form button {
+  background: #0b5cff;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: var(--fs-base);
+}
+.add-form .msg {
+  margin-top: 6px;
+  font-size: var(--fs-sm);
+  color: #16a34a;
+}
+.error {
+  color: #d33;
+}
 
 /* =========================
    空狀態
    ========================= */
-.empty{
-  display:grid; place-items:center;
-  height:clamp(180px, 30vh, 240px);
-  border:1px dashed #cbd5e1; border-radius:12px; background:#fafbff;
+.empty {
+  display: grid;
+  place-items: center;
+  height: clamp(180px, 30vh, 240px);
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #fafbff;
 }
-.add-big{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:10px 14px; background:#eef2ff; color:#0b5cff;
-  border:1px solid #dbe1ff; border-radius:10px; cursor:pointer;
-  font-size:var(--fs-base);
+.add-big {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #eef2ff;
+  color: #0b5cff;
+  border: 1px solid #dbe1ff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: var(--fs-base);
 }
 
 /* =========================
    主 Grid（固定 10 欄；等高）
    ========================= */
-.grid{
-  display:grid;
+.grid {
+  display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
-  gap:var(--gutter);
-  align-items:stretch; /* 等高 */
+  gap: var(--gutter);
+  align-items: stretch;
 }
-.grid-card{
-  background:#fff; border:1px solid #eceff4; border-radius:calc(var(--radius) + 2px);
+.grid-card {
+  background: #fff;
+  border: 1px solid #eceff4;
+  border-radius: calc(var(--radius) + 2px);
   padding: clamp(8px, 1.2vw, 14px);
-  color:#111; height:100%;
+  color: #111;
+  height: 100%;
 
-  /* 用 grid 切 4 區：圖 / 名 / 價格 / 補充（完全等高） */
-  display:grid;
-  grid-template-rows: auto var(--h-name) var(--h-price) var(--h-note);
-  align-content:start;
+  /* 三段式：圖 / 名稱 / 價格＋補充（因 wanted 在 price-block 內） */
+  display: grid;
+  grid-template-rows: auto var(--h-name) var(--h-price-plus-note);
+  align-content: start;
   gap: clamp(6px, 1vw, 12px);
 }
-.grid-card i{ font-size:clamp(16px, 1.4vw, 22px); color:#6b7280; }
-.grid-card .name{ font-weight:700; font-size:var(--fs-base); }
-.grid-card:hover{ border-color:#c7d2fe; box-shadow:0 4px 16px rgba(11,92,255,.08); }
+.grid-card i {
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: #6b7280;
+}
+.grid-card .name {
+  font-weight: 700;
+  font-size: var(--fs-base);
+}
+.grid-card:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 4px 16px rgba(11, 92, 255, 0.08);
+}
 
 /* 右上模式切換 */
-.mode-btn{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:8px 12px; border-radius:8px;
-  border:1px solid var(--border, #dcdfe6); background:#fff;
-  cursor:pointer; font-weight:600; font-size:var(--fs-base);
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #dcdfe6);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--fs-base);
 }
-.mode-btn.is-on{ background:#fff2; color:#0b5cff; border-color:#0b5cff; }
+.mode-btn.is-on {
+  background: #fff2;
+  color: #0b5cff;
+  border-color: #0b5cff;
+}
 
 /* 編輯提示 */
-.grid.grid--edit .grid-card{ cursor:default; position:relative; }
-.grid.grid--edit .grid-card:hover{ outline:2px dashed #0b5cff; }
+.grid.grid--edit .grid-card {
+  cursor: default;
+  position: relative;
+}
+.grid.grid--edit .grid-card:hover {
+  outline: 2px dashed #0b5cff;
+}
 
 /* 卡片右上動作鍵 */
-.card-actions{
-  position:absolute; top:8px; right:8px; display:flex; gap:6px;
+.card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
 }
-.icon-btn{
-  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
-  border-radius:8px; border:2px solid #dcdfe6; background:#fff;
-  font-size:18px; line-height:1;
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 2px solid #dcdfe6;
+  background: #fff;
+  font-size: 18px;
+  line-height: 1;
 }
-.icon-btn:hover{ background:#f3f6ff; }
-.icon-btn.danger{ border:2px solid #ff4d4f; }
-.icon-btn.danger:hover{ background:#fff1f0; }
+.icon-btn:hover {
+  background: #f3f6ff;
+}
+.icon-btn.danger {
+  border: 2px solid #ff4d4f;
+}
+.icon-btn.danger:hover {
+  background: #fff1f0;
+}
 
 /* 就地編輯 */
-.grid-card.is-editing{ outline:2px solid #0b5cff; }
-.inline-edit{ display:grid; gap:8px; width:100%; }
-.inline-edit input{
-  width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px;
+.grid-card.is-editing {
+  outline: 2px solid #0b5cff;
 }
-.inline-actions{ display:flex; gap:8px; }
+.inline-edit {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+.inline-edit input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+.inline-actions {
+  display: flex;
+  gap: 8px;
+}
 .inline-actions .save,
-.inline-actions .cancel{
-  padding:6px 10px; border-radius:6px; border:1px solid #dcdfe6; background:#fff;
-  font-size:var(--fs-base);
+.inline-actions .cancel {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #dcdfe6;
+  background: #fff;
+  font-size: var(--fs-base);
 }
-.inline-actions .save{ border-color:#0b5cff; color:#0b5cff; }
-.inline-actions .save:hover{ background:#f0f5ff; }
-.inline-actions .cancel:hover{ background:#f7f7f7; }
+.inline-actions .save {
+  border-color: #0b5cff;
+  color: #0b5cff;
+}
+.inline-actions .save:hover {
+  background: #f0f5ff;
+}
+.inline-actions .cancel:hover {
+  background: #f7f7f7;
+}
 
 /* =========================
    Modal 80% × 80%
    ========================= */
-.modal-overlay{
-  position:fixed; inset:0; background:rgba(0,0,0,.35);
-  display:grid; place-items:center; z-index:1000;
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
 }
-.modal-80{
-  width:80vw; height:80vh; background:#fff; border-radius:16px;
-  box-shadow:0 20px 60px rgba(0,0,0,.25);
-  display:flex; flex-direction:column; overflow:hidden;
+.modal-80 {
+  width: 80vw;
+  height: 80vh;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
-.modal-head{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 18px; border-bottom:1px solid #eef0f4;
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef0f4;
 }
-.modal-title{ font-size:18px; font-weight:700; }
-.modal-sub{ color:#64748b; font-size:12px; margin-top:2px; }
-.close-btn{
-  width:36px; height:36px; border-radius:10px; border:1px solid #e5e7eb; background:#fff;
-  font-size:20px; line-height:1; cursor:pointer;
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.modal-sub {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 /* 內容：桌機兩欄，小螢幕單欄 */
-.card-form{
-  flex:1; width:100%;
-  display:grid; grid-template-columns:30% 70%;
-  gap:16px; padding:16px; overflow:auto;
+.card-form {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 30% 70%;
+  gap: 16px;
+  padding: 16px;
+  overflow: auto;
 }
-@media (max-width: 900px){
-  .modal-80{ width:96vw; height:96vh; }
-  .card-form{ grid-template-columns:1fr; gap:var(--gutter); padding:var(--gutter); }
+@media (max-width: 900px) {
+  .modal-80 {
+    width: 96vw;
+    height: 96vh;
+  }
+  .card-form {
+    grid-template-columns: 1fr;
+    gap: var(--gutter);
+    padding: var(--gutter);
+  }
 }
-
-.card-form-left{ display:grid; gap:12px; align-content:start; }
-.imgbox{
-  aspect-ratio:63 / 88; width:100%;
-  border:1px dashed #cbd5e1; border-radius:12px;
-  display:grid; place-items:center; overflow:hidden; background:#f8fafc;
-  flex-shrink:0;
+.card-form-left {
+  display: grid;
+  gap: 12px;
+  align-content: start;
 }
-.imgbox img{ width:100%; height:100%; object-fit:contain; object-position:center; }
-.img-empty{ color:#9aa4b2; }
-.file-btn{
-  display:inline-block; padding:8px 12px; border:1px solid #dcdfe6; border-radius:8px;
-  background:#fff; cursor:pointer; text-align:center; font-size:var(--fs-base);
+.imgbox {
+  aspect-ratio: 63 / 88;
+  width: 100%;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #f8fafc;
+  flex-shrink: 0;
 }
-
-.card-form-right{ display:grid; gap:14px; }
-.form-row{ display:grid; gap:6px; }
-.form-row label{ font-weight:600; color:#334155; font-size:var(--fs-base); }
+.imgbox img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+.img-empty {
+  color: #9aa4b2;
+}
+.file-btn {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  font-size: var(--fs-base);
+}
+.card-form-right {
+  display: grid;
+  gap: 14px;
+}
+.form-row {
+  display: grid;
+  gap: 6px;
+}
+.form-row label {
+  font-weight: 600;
+  color: #334155;
+  font-size: var(--fs-base);
+}
 .form-row input,
-.form-row select{
-  width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; outline:none;
-  font-size:var(--fs-base);
+.form-row select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-size: var(--fs-base);
 }
-.row-inline{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-.mini-btn{
-  padding:6px 10px; border:1px solid #dcdfe6; background:#fff; border-radius:8px;
-  cursor:pointer; font-size:var(--fs-base);
+.row-inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
-.mini-btn.primary{ border-color:#0b5cff; color:#0b5cff; }
-
-.form-actions{
-  display:flex; flex-direction:row; justify-content:start; align-items:center;
-  gap:10px; margin-top:6px; flex-wrap:wrap;
+.mini-btn {
+  padding: 6px 10px;
+  border: 1px solid #dcdfe6;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: var(--fs-base);
 }
-.form-actions button{ height:auto; }
+.mini-btn.primary {
+  border-color: #0b5cff;
+  color: #0b5cff;
+}
+.form-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.form-actions button {
+  height: auto;
+}
 .form-actions .primary,
-.form-actions .ghost{
-  padding:clamp(8px, 1.4vw, 10px) clamp(12px, 2vw, 14px);
-  border-radius:10px; font-weight:700; font-size:var(--fs-base);
+.form-actions .ghost {
+  padding: clamp(8px, 1.4vw, 10px) clamp(12px, 2vw, 14px);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: var(--fs-base);
 }
-.form-actions .primary{ background:#0b5cff; color:#fff; border:0; }
-.form-actions .ghost{ border:1px solid #dcdfe6; background:#fff; }
+.form-actions .primary {
+  background: #0b5cff;
+  color: #fff;
+  border: 0;
+}
+.form-actions .ghost {
+  border: 1px solid #dcdfe6;
+  background: #fff;
+}
 
 /* =========================
    基本新增按鈕（通用）
    ========================= */
-.add-btn{
-  display:inline-flex; align-items:center; justify-content:center;
-  padding:8px 16px; border-radius:8px; background:#4CAF50; color:#fff;
-  font-size:var(--fs-base); font-weight:600; cursor:pointer; border:none;
-  transition:background-color .2s ease, transform .1s ease;
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #4caf50;
+  color: #fff;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
 }
-.add-btn:hover{ background:#45a049; }
-.add-btn:active{ transform:scale(.96); }
-.add-btn:disabled{ background:#a5d6a7; cursor:not-allowed; }
+.add-btn:hover {
+  background: #45a049;
+}
+.add-btn:active {
+  transform: scale(0.96);
+}
+.add-btn:disabled {
+  background: #a5d6a7;
+  cursor: not-allowed;
+}
 
 /* page-actions 中的 add-btn 額外樣式 */
-.page-actions .add-btn{ border:1px solid green; color:green; background:#fff; }
-.page-actions .add-btn:hover{ background-color:green; color:#fff; }
+.page-actions .add-btn {
+  border: 1px solid green;
+  color: green;
+  background: #fff;
+}
+.page-actions .add-btn:hover {
+  background-color: green;
+  color: #fff;
+}
 
 /* =========================
    卡片清單 Grid（固定 10 欄；等高）
    ========================= */
-.cards-grid{
-  display:grid;
+.cards-grid {
+  display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
-  gap:var(--gutter);
-  margin-top:var(--gutter);
-  align-items:stretch; /* 等高 */
+  gap: var(--gutter);
+  margin-top: var(--gutter);
+  align-items: stretch;
 }
 
-/* 卡片外框：用 grid 切 4 區（圖/名/價/補充） */
-.card-item{
-  background:#fff; border:1px solid #e5e7eb; border-radius:10px;
+/* 卡片：三段式（圖 / 名稱 / 價格＋補充） */
+.card-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
   padding: clamp(8px, 1.1vw, 12px);
-  height:100%;
-  display:grid;
-  grid-template-rows: auto var(--h-name) var(--h-price) var(--h-note);
-  align-content:start;
-  transition: box-shadow .15s ease, transform .1s ease;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto var(--h-name) var(--h-price-plus-note);
+  align-content: start;
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
 }
-.card-item:hover{ box-shadow:0 4px 16px rgba(0,0,0,.06); transform:translateY(-2px); }
-
-/* 圖片區（固定比例且不壓縮） */
-.card-thumb{
-  aspect-ratio:63 / 88; width:100%;
-  border:1px dashed #cbd5e1; border-radius:12px;
-  display:grid; place-items:center; overflow:hidden; background:#f8fafc;
-}
-.card-thumb img{ width:100%; height:100%; object-fit:contain; object-position:center; }
-.card-thumb__empty{ font-size:var(--fs-sm); color:#9ca3af; }
-
-/* 名稱：單行省略＋固定高度 */
-.card-name{
-  margin-top:8px; height:var(--h-name);
-  font-size:var(--fs-sm); font-weight:600; color:#111827;
-  width:100%; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  line-height:1.2;
+.card-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
 }
 
-/* 價格區：置中並限制高度，避免把卡片撐高 */
-.price-block{
-  margin-top:8px; height:var(--h-price);
-  display:flex; flex-direction:column; justify-content:center; align-items:center;
-  text-align:center; line-height:1.25; overflow:hidden;
+/* 圖片區 */
+.card-thumb {
+  aspect-ratio: 63 / 88;
+  width: 100%;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #f8fafc;
 }
-.price-row{ margin:4px 0; font-weight:700; font-size:var(--fs-base); }
-.price-row .yen{ margin-top:2px; font-size:clamp(14px, 1.4vw, 18px); }
-.price-row.red{ color:#e11d48; }
-.price-row.green{ color:#16a34a; }
-
-/* 補充文字：單行省略＋固定高度 */
-.wanted{
-  margin-top:4px; height:var(--h-note);
-  font-size:var(--fs-sm); color:#6b7280;
-  display:flex; align-items:center; justify-content:center;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+.card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
-
-/* 無資料提示 */
-.empty-hint{
-  grid-column:1 / -1; text-align:center; padding:24px 0; color:#6b7280;
+.card-thumb__empty {
+  font-size: var(--fs-sm);
+  color: #9ca3af;
 }
 
-/* 其他佔位 */
-.placeholder-box{
-  height:clamp(180px, 30vh, 240px);
-  border:2px dashed #e5e7eb; border-radius:16px; background:#fafbff;
+/* 名稱（單行省略） */
+.card-name {
+  margin-top: 8px;
+  height: var(--h-name);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: #111827;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* 價格＋補充（wanted 在內） */
+.price-block {
+  margin-top: 8px;
+  height: var(--h-price-plus-note);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  line-height: 1.25;
+  overflow: hidden;
+}
+.price-row {
+  margin: 4px 0;
+  font-weight: 700;
+  font-size: var(--fs-base);
+}
+.price-row .yen {
+  margin-top: 2px;
+  font-size: clamp(14px, 1.4vw, 18px);
+}
+.price-row.red {
+  color: #e11d48;
+}
+.price-row.green {
+  color: #16a34a;
+}
+
+/* wanted：三段文字可排成一列 */
+.wanted {
+  margin-top: 4px;
+  font-size: var(--fs-sm);
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wanted > * {
+  display: inline;
+  white-space: nowrap;
+}
+
+/* 無資料提示／佔位 */
+.empty-hint {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 24px 0;
+  color: #6b7280;
+}
+.placeholder-box {
+  height: clamp(180px, 30vh, 240px);
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+  background: #fafbff;
 }

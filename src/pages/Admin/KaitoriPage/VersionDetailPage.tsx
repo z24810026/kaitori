@@ -6,10 +6,16 @@ import { useKyaraOptions, addKyara } from "../../../hook/useKyaras";
 import { useTypeOptions, addType } from "../../../hook/useTypes";
 import { addCardInfo } from "../../../hook/useCardInfo";
 import { db } from "../../../firebase";
-import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  orderBy,
+} from "firebase/firestore";
 import { uploadImageAndGetURL } from "../../../hook/useUploadImage";
 import LoadingSpinner from "../../../components/common/LoadingSpinner"; // 你現有的
-import { useToast } from "../../../components/common/Toast";           // ← 新增
+import { useToast } from "../../../components/common/Toast"; // ← 新增
 import "../CSS/Kaitori.css";
 
 type CardInfo = {
@@ -61,7 +67,7 @@ export default function VersionDetailPage() {
 
   // 下拉選項
   const kyaraOptions = useKyaraOptions(cardGameName, versionName);
-  const typeOptions  = useTypeOptions(cardGameName, versionName);
+  const typeOptions = useTypeOptions(cardGameName, versionName);
 
   // 新增卡片的彈窗
   const [showForm, setShowForm] = useState(false);
@@ -110,62 +116,84 @@ export default function VersionDetailPage() {
 
   // 小工具：欄位驗證（需要你可以再擴充）
   const validateForm = () => {
-    if (!cardGameName) { toast.error("作品名の読込に失敗しました。ページを更新してください。"); return false; }
-    if (!versionName)  { toast.error("バージョン名の読込に失敗しました。ページを更新してください。"); return false; }
-    if (!cardName.trim()) { toast.error("カード名を入力してください。"); return false; }
-    if (storePrice !== "" && (isNaN(Number(storePrice)) || Number(storePrice) < 0)) {
-      toast.error("店頭買取価格は0以上の数値で入力してください。"); return false;
+    if (!cardGameName) {
+      toast.error("作品名の読込に失敗しました。ページを更新してください。");
+      return false;
+    }
+    if (!versionName) {
+      toast.error(
+        "バージョン名の読込に失敗しました。ページを更新してください。",
+      );
+      return false;
+    }
+    if (!cardName.trim()) {
+      toast.error("カード名を入力してください。");
+      return false;
+    }
+    if (
+      storePrice !== "" &&
+      (isNaN(Number(storePrice)) || Number(storePrice) < 0)
+    ) {
+      toast.error("店頭買取価格は0以上の数値で入力してください。");
+      return false;
     }
     if (minPrice !== "" && (isNaN(Number(minPrice)) || Number(minPrice) < 0)) {
-      toast.error("最低買取価格は0以上の数値で入力してください。"); return false;
+      toast.error("最低買取価格は0以上の数値で入力してください。");
+      return false;
     }
-    if (wantedQty !== "" && (isNaN(Number(wantedQty)) || Number(wantedQty) < 0)) {
-      toast.error("募集枚数は0以上の数値で入力してください。"); return false;
+    if (
+      wantedQty !== "" &&
+      (isNaN(Number(wantedQty)) || Number(wantedQty) < 0)
+    ) {
+      toast.error("募集枚数は0以上の数値で入力してください。");
+      return false;
     }
     return true;
   };
 
   const submitCard = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validateForm()) return;
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  await runWithLoading(async () => {
-    try {
-      // 1) 上傳圖片（如有）
-      let photoDownloadURL: string | undefined;
-      if (photoFile) {
-        const safeName = cardName.trim().replace(/[^\w\-一-龥ぁ-んァ-ン]/g, "_").slice(0, 60);
-        const path = `cardImages/${cardGameName}/${versionName}/${safeName}_${Date.now()}.jpg`;
-        photoDownloadURL = await uploadImageAndGetURL(photoFile, path);
+    await runWithLoading(async () => {
+      try {
+        // 1) 上傳圖片（如有）
+        let photoDownloadURL: string | undefined;
+        if (photoFile) {
+          const safeName = cardName
+            .trim()
+            .replace(/[^\w\-一-龥ぁ-んァ-ン]/g, "_")
+            .slice(0, 60);
+          const path = `cardImages/${cardGameName}/${versionName}/${safeName}_${Date.now()}.jpg`;
+          photoDownloadURL = await uploadImageAndGetURL(photoFile, path);
+        }
+
+        // 2) 組 payload：避免 undefined
+        const payload = {
+          cardGameName,
+          versionName,
+          cardName: cardName.trim(),
+          ...(photoDownloadURL ? { cardPhoto: photoDownloadURL } : {}),
+          ...(cardKyara ? { cardKyara } : {}),
+          ...(cardType ? { cardType } : {}),
+          ...(typeof storePrice === "number" ? { storePrice } : {}),
+          ...(typeof minPrice === "number" ? { minPrice } : {}),
+          ...(typeof wantedQty === "number" ? { wantedQty } : {}),
+        };
+
+        await addCardInfo(payload as any);
+
+        // 先關窗＆清表單，再提示成功（避免被遮住）
+        setShowForm(false);
+        resetForm();
+
+        toast.success(`「${payload.cardName}」を保存しました。`);
+      } catch (err) {
+        console.error(err);
+        toast.error("保存に失敗しました。もう一度お試しください。");
       }
-
-      // 2) 組 payload：避免 undefined
-      const payload = {
-        cardGameName,
-        versionName,
-        cardName: cardName.trim(),
-        ...(photoDownloadURL ? { cardPhoto: photoDownloadURL } : {}),
-        ...(cardKyara ? { cardKyara } : {}),
-        ...(cardType  ? { cardType }  : {}),
-        ...(typeof storePrice === "number" ? { storePrice } : {}),
-        ...(typeof minPrice   === "number" ? { minPrice   } : {}),
-        ...(typeof wantedQty  === "number" ? { wantedQty  } : {}),
-      };
-
-      await addCardInfo(payload as any);
-
-      // 先關窗＆清表單，再提示成功（避免被遮住）
-      setShowForm(false);
-      resetForm();
-
-      toast.success(`「${payload.cardName}」を保存しました。`);
-    } catch (err) {
-      console.error(err);
-      toast.error("保存に失敗しました。もう一度お試しください。");
-    }
-  });
-};
-
+    });
+  };
 
   // ===== 卡列表：監聽當前版本的卡片 =====
   const [cards, setCards] = useState<CardInfo[]>([]);
@@ -175,7 +203,7 @@ export default function VersionDetailPage() {
       collection(db, "CardInfo_Table"),
       where("cardGameName", "==", cardGameName),
       where("versionName", "==", versionName),
-      orderBy("cardName", "asc")
+      orderBy("cardName", "asc"),
     );
     const unsub = onSnapshot(q, (snap) => {
       const rows: CardInfo[] = snap.docs.map((d) => ({
@@ -189,7 +217,10 @@ export default function VersionDetailPage() {
 
   if (loading) {
     return (
-      <div className="page" style={{display:"grid",placeItems:"center",minHeight:"60vh"}}>
+      <div
+        className="page"
+        style={{ display: "grid", placeItems: "center", minHeight: "60vh" }}
+      >
         <LoadingSpinner />
       </div>
     );
@@ -212,36 +243,53 @@ export default function VersionDetailPage() {
       </div>
 
       {/* 卡片清單 */}
-<div className="cards-grid">
-  {cards.map((c) => (
-    <Link
-      key={c.id}
-      to={`/admin/kaitori/${id}/version/${vid}/card/${c.id}`}
-      style={{ textDecoration: "none", color: "inherit" }}
-      className="card-item"
-    >
-      <div className="card-thumb">
-        {c.cardPhoto ? <img src={c.cardPhoto} alt={c.cardName} /> : <div className="card-thumb__empty">No Image</div>}
+      <div className="cards-grid">
+        {cards.map((c) => (
+          <Link
+            key={c.id}
+            to={`/admin/kaitori/${id}/version/${vid}/card/${c.id}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+            className="card-item"
+          >
+            <div className="card-thumb">
+              {c.cardPhoto ? (
+                <img src={c.cardPhoto} alt={c.cardName} />
+              ) : (
+                <div className="card-thumb__empty">No Image</div>
+              )}
+            </div>
+
+            <div className="card-name" title={c.cardName}>
+              {c.cardName}
+            </div>
+
+            <div className="price-block">
+              <div className="price-row red">
+                店頭買取価格
+                <div className="yen">
+                  {typeof c.storePrice === "number"
+                    ? `¥${c.storePrice.toLocaleString()}`
+                    : "—"}
+                </div>
+              </div>
+              <div className="price-row green">
+                最低買取価格
+                <div className="yen">
+                  {typeof c.minPrice === "number"
+                    ? `¥${c.minPrice.toLocaleString()}`
+                    : "—"}
+                </div>
+              </div>
+              <div className="wanted">
+                本日{typeof c.wantedQty === "number" ? c.wantedQty : 0}枚募集
+              </div>
+            </div>
+          </Link>
+        ))}
+        {cards.length === 0 && (
+          <div className="empty-hint">カードはまだ登録されていません</div>
+        )}
       </div>
-
-      <div className="card-name" title={c.cardName}>{c.cardName}</div>
-
-      <div className="price-block">
-        <div className="price-row red">
-          店頭買取価格
-          <div className="yen">{typeof c.storePrice === "number" ? `¥${c.storePrice.toLocaleString()}` : "—"}</div>
-        </div>
-        <div className="price-row green">
-          最低買取価格
-          <div className="yen">{typeof c.minPrice === "number" ? `¥${c.minPrice.toLocaleString()}` : "—"}</div>
-        </div>
-        <div className="wanted">本日{typeof c.wantedQty === "number" ? c.wantedQty : 0}枚募集</div>
-      </div>
-    </Link>
-  ))}
-  {cards.length === 0 && <div className="empty-hint">カードはまだ登録されていません</div>}
-</div>
-
 
       {/* 80% x 80% 的彈窗 */}
       {showForm && (
@@ -254,14 +302,20 @@ export default function VersionDetailPage() {
                   {cardGameName} / {versionName}
                 </div>
               </div>
-              <button className="close-btn" onClick={() => setShowForm(false)}>×</button>
+              <button className="close-btn" onClick={() => setShowForm(false)}>
+                ×
+              </button>
             </div>
 
             <form className="card-form" onSubmit={submitCard}>
               {/* 左 30%：圖片 */}
               <div className="card-form-left">
                 <div className="imgbox">
-                  {photoPreview ? <img src={photoPreview} alt="preview" /> : <div className="img-empty">画像プレビュー</div>}
+                  {photoPreview ? (
+                    <img src={photoPreview} alt="preview" />
+                  ) : (
+                    <div className="img-empty">画像プレビュー</div>
+                  )}
                 </div>
                 <label className="file-btn">
                   画像を選択
@@ -291,13 +345,24 @@ export default function VersionDetailPage() {
 
                   {!addingKyara ? (
                     <div className="row-inline">
-                      <select value={cardKyara} onChange={(e) => setCardKyara(e.target.value)}>
+                      <select
+                        value={cardKyara}
+                        onChange={(e) => setCardKyara(e.target.value)}
+                      >
                         <option value="">（未選択）</option>
                         {kyaraOptions.map((k) => (
-                          <option key={k.id} value={k.cardKyaraName}>{k.cardKyaraName}</option>
+                          <option key={k.id} value={k.cardKyaraName}>
+                            {k.cardKyaraName}
+                          </option>
                         ))}
                       </select>
-                      <button type="button" className="mini-btn" onClick={() => setAddingKyara(true)}>＋ 新規追加</button>
+                      <button
+                        type="button"
+                        className="mini-btn"
+                        onClick={() => setAddingKyara(true)}
+                      >
+                        ＋ 新規追加
+                      </button>
                     </div>
                   ) : (
                     <div className="row-inline">
@@ -310,16 +375,39 @@ export default function VersionDetailPage() {
                         type="button"
                         className="mini-btn primary"
                         onClick={async () => {
-                          if (!newKyaraName.trim()) { toast.error("キャラクター名を入力してください。"); return; }
-                          if (!cardGameName || !versionName) { toast.error("バージョン情報の読み込み待ちです。"); return; }
-                          await runWithLoading(() => addKyara(cardGameName, versionName, newKyaraName.trim()));
+                          if (!newKyaraName.trim()) {
+                            toast.error("キャラクター名を入力してください。");
+                            return;
+                          }
+                          if (!cardGameName || !versionName) {
+                            toast.error("バージョン情報の読み込み待ちです。");
+                            return;
+                          }
+                          await runWithLoading(() =>
+                            addKyara(
+                              cardGameName,
+                              versionName,
+                              newKyaraName.trim(),
+                            ),
+                          );
                           toast.success("キャラクターを追加しました。");
                           setCardKyara(newKyaraName.trim());
                           setNewKyaraName("");
                           setAddingKyara(false);
                         }}
-                      >追加</button>
-                      <button type="button" className="mini-btn" onClick={() => { setAddingKyara(false); setNewKyaraName(""); }}>キャンセル</button>
+                      >
+                        追加
+                      </button>
+                      <button
+                        type="button"
+                        className="mini-btn"
+                        onClick={() => {
+                          setAddingKyara(false);
+                          setNewKyaraName("");
+                        }}
+                      >
+                        キャンセル
+                      </button>
                     </div>
                   )}
                 </div>
@@ -330,13 +418,24 @@ export default function VersionDetailPage() {
 
                   {!addingType ? (
                     <div className="row-inline">
-                      <select value={cardType} onChange={(e) => setCardType(e.target.value)}>
+                      <select
+                        value={cardType}
+                        onChange={(e) => setCardType(e.target.value)}
+                      >
                         <option value="">（未選択）</option>
                         {typeOptions.map((t) => (
-                          <option key={t.id} value={t.cardTypeName}>{t.cardTypeName}</option>
+                          <option key={t.id} value={t.cardTypeName}>
+                            {t.cardTypeName}
+                          </option>
                         ))}
                       </select>
-                      <button type="button" className="mini-btn" onClick={() => setAddingType(true)}>＋ 新規追加</button>
+                      <button
+                        type="button"
+                        className="mini-btn"
+                        onClick={() => setAddingType(true)}
+                      >
+                        ＋ 新規追加
+                      </button>
                     </div>
                   ) : (
                     <div className="row-inline">
@@ -349,16 +448,39 @@ export default function VersionDetailPage() {
                         type="button"
                         className="mini-btn primary"
                         onClick={async () => {
-                          if (!newTypeName.trim()) { toast.error("種類名を入力してください。"); return; }
-                          if (!cardGameName || !versionName) { toast.error("バージョン情報の読み込み待ちです。"); return; }
-                          await runWithLoading(() => addType(cardGameName, versionName, newTypeName.trim()));
+                          if (!newTypeName.trim()) {
+                            toast.error("種類名を入力してください。");
+                            return;
+                          }
+                          if (!cardGameName || !versionName) {
+                            toast.error("バージョン情報の読み込み待ちです。");
+                            return;
+                          }
+                          await runWithLoading(() =>
+                            addType(
+                              cardGameName,
+                              versionName,
+                              newTypeName.trim(),
+                            ),
+                          );
                           toast.success("種類を追加しました。");
                           setCardType(newTypeName.trim());
                           setNewTypeName("");
                           setAddingType(false);
                         }}
-                      >追加</button>
-                      <button type="button" className="mini-btn" onClick={() => { setAddingType(false); setNewTypeName(""); }}>キャンセル</button>
+                      >
+                        追加
+                      </button>
+                      <button
+                        type="button"
+                        className="mini-btn"
+                        onClick={() => {
+                          setAddingType(false);
+                          setNewTypeName("");
+                        }}
+                      >
+                        キャンセル
+                      </button>
                     </div>
                   )}
                 </div>
@@ -368,7 +490,11 @@ export default function VersionDetailPage() {
                   <input
                     type="number"
                     value={storePrice}
-                    onChange={(e) => setStorePrice(e.target.value === "" ? "" : Number(e.target.value))}
+                    onChange={(e) =>
+                      setStorePrice(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
                     min={0}
                   />
                 </div>
@@ -378,7 +504,11 @@ export default function VersionDetailPage() {
                   <input
                     type="number"
                     value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value === "" ? "" : Number(e.target.value))}
+                    onChange={(e) =>
+                      setMinPrice(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
                     min={0}
                   />
                 </div>
@@ -388,14 +518,29 @@ export default function VersionDetailPage() {
                   <input
                     type="number"
                     value={wantedQty}
-                    onChange={(e) => setWantedQty(e.target.value === "" ? "" : Number(e.target.value))}
+                    onChange={(e) =>
+                      setWantedQty(
+                        e.target.value === "" ? "" : Number(e.target.value),
+                      )
+                    }
                     min={0}
                   />
                 </div>
 
                 <div className="form-actions">
-                  <button className="primary" type="submit">保存</button>
-                  <button className="ghost" type="button" onClick={() => { resetForm(); setShowForm(false); }}>閉じる</button>
+                  <button className="primary" type="submit">
+                    保存
+                  </button>
+                  <button
+                    className="ghost"
+                    type="button"
+                    onClick={() => {
+                      resetForm();
+                      setShowForm(false);
+                    }}
+                  >
+                    閉じる
+                  </button>
                 </div>
               </div>
             </form>
@@ -405,14 +550,29 @@ export default function VersionDetailPage() {
 
       {/* 全畫面 Loading */}
       {isBusy && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,.35)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 9999, backdropFilter: "blur(2px)"
-        }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,.35)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+            backdropFilter: "blur(2px)",
+          }}
+        >
           <div style={{ display: "grid", placeItems: "center", gap: 12 }}>
             <LoadingSpinner />
-            <div style={{ color: "#fff", fontWeight: 700, textShadow: "0 1px 2px rgba(0,0,0,.4)" }}>処理中…</div>
+            <div
+              style={{
+                color: "#fff",
+                fontWeight: 700,
+                textShadow: "0 1px 2px rgba(0,0,0,.4)",
+              }}
+            >
+              処理中…
+            </div>
           </div>
         </div>
       )}

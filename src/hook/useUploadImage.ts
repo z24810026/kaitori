@@ -8,9 +8,12 @@ import { storage } from "../firebase";
  * @param path  存放到 Storage 的路徑（例：cardImages/{game}/{version}/{docId}.jpg）
  */
 
-export async function uploadImageAndGetURL(file: File, path: string): Promise<string> {
+export async function uploadImageAndGetURL(
+  file: File,
+  path: string,
+): Promise<string> {
   const objectRef = ref(storage, path);
-  await uploadBytes(objectRef, file);           // 上傳檔案
-  const url = await getDownloadURL(objectRef);  // 取得永久網址
+  await uploadBytes(objectRef, file); // 上傳檔案
+  const url = await getDownloadURL(objectRef); // 取得永久網址
   return url;
 }

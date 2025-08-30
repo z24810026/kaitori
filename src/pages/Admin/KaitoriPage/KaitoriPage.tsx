@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCardGameList, addCardGame } from "../../../hook/useCardGames";
 import { updateCardGame, deleteCardGame } from "../../../hook/useCardGames";
 import LoadingOverlay from "../../../components/common/LoadingOverlay";

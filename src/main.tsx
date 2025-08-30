@@ -18,7 +18,9 @@ import { ToastProvider } from "./components/common/Toast"; // ✅
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ToastProvider> {/* ✅ 讓全站都能用 useToast() */}
+    <ToastProvider>
+      {" "}
+      {/* ✅ 讓全站都能用 useToast() */}
       <BrowserRouter>
         <AuthProvider>
           <Routes>
@@ -39,19 +41,27 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
               <Route index element={<AdminDashboard />} />
               <Route path="kaitori" element={<KaitoriPage />} />
               <Route path="kaitori/:id" element={<CardGameDetailPage />} />
-              <Route path="kaitori/:id/version/:vid" element={<VersionDetailPage />} />
-              <Route path="kaitori/:id/version/:vid/card/:cid" element={<CardDetailPage />} />
+              <Route
+                path="kaitori/:id/version/:vid"
+                element={<VersionDetailPage />}
+              />
+              <Route
+                path="kaitori/:id/version/:vid/card/:cid"
+                element={<CardDetailPage />}
+              />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
 
             {/* 404 */}
             <Route
               path="*"
-              element={<div style={{ padding: 24 }}>ページが見つかりません（404）</div>}
+              element={
+                <div style={{ padding: 24 }}>ページが見つかりません（404）</div>
+              }
             />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
     </ToastProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

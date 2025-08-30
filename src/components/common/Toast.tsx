@@ -1,13 +1,24 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 type ToastType = "success" | "error" | "info" | "warning";
-type ToastItem = { id: number; type: ToastType; message: string; duration: number };
+type ToastItem = {
+  id: number;
+  type: ToastType;
+  message: string;
+  duration: number;
+};
 
 type ToastAPI = {
   success: (msg: string, duration?: number) => void;
-  error:   (msg: string, duration?: number) => void;
-  info:    (msg: string, duration?: number) => void;
+  error: (msg: string, duration?: number) => void;
+  info: (msg: string, duration?: number) => void;
   warning: (msg: string, duration?: number) => void;
 };
 
@@ -37,28 +48,34 @@ const baseStyle: React.CSSProperties = {
 
 const colorByType: Record<ToastType, string> = {
   success: "#16a34a",
-  error:   "#dc2626",
-  info:    "#2563eb",
+  error: "#dc2626",
+  info: "#2563eb",
   warning: "#d97706",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const push = useCallback((type: ToastType, message: string, duration = 3000) => {
-    const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { id, type, message, duration }]);
-    window.setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, duration);
-  }, []);
+  const push = useCallback(
+    (type: ToastType, message: string, duration = 3000) => {
+      const id = Date.now() + Math.random();
+      setToasts((prev) => [...prev, { id, type, message, duration }]);
+      window.setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, duration);
+    },
+    [],
+  );
 
-  const api = useMemo<ToastAPI>(() => ({
-    success: (m, d) => push("success", m, d),
-    error:   (m, d) => push("error",   m, d),
-    info:    (m, d) => push("info",    m, d),
-    warning: (m, d) => push("warning", m, d),
-  }), [push]);
+  const api = useMemo<ToastAPI>(
+    () => ({
+      success: (m, d) => push("success", m, d),
+      error: (m, d) => push("error", m, d),
+      info: (m, d) => push("info", m, d),
+      warning: (m, d) => push("warning", m, d),
+    }),
+    [push],
+  );
 
   return (
     <ToastCtx.Provider value={api}>
@@ -66,12 +83,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {createPortal(
         <div style={viewportStyle}>
           {toasts.map((t) => (
-            <div key={t.id} style={{ ...baseStyle, background: colorByType[t.type] }}>
+            <div
+              key={t.id}
+              style={{ ...baseStyle, background: colorByType[t.type] }}
+            >
               {t.message}
             </div>
           ))}
         </div>,
-        document.body
+        document.body,
       )}
     </ToastCtx.Provider>
   );
