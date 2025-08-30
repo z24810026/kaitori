@@ -1,10 +1,9 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 import "./CSS/AdminLayout.css";
 
 export default function AdminLayout() {
   const { logout, user } = useAuth();
-  const navigate = useNavigate();
 
   const onLogout = async () => {
     await logout();
