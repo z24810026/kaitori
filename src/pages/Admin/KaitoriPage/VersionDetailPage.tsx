@@ -1,21 +1,15 @@
 // src/pages/.../VersionDetailPage.tsx
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getVersion } from "../../../hook/useVersions";
 import { useKyaraOptions, addKyara } from "../../../hook/useKyaras";
 import { useTypeOptions, addType } from "../../../hook/useTypes";
 import { addCardInfo } from "../../../hook/useCardInfo";
 import { db } from "../../../firebase";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  orderBy,
-} from "firebase/firestore";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { uploadImageAndGetURL } from "../../../hook/useUploadImage";
-import LoadingSpinner from "../../../components/common/LoadingSpinner"; // 你現有的
-import { useToast } from "../../../components/common/Toast"; // ← 新增
+import LoadingSpinner from "../../../components/common/LoadingSpinner";
+import { useToast } from "../../../components/common/Toast";
 import "../CSS/Kaitori.css";
 
 type CardInfo = {
@@ -114,26 +108,21 @@ export default function VersionDetailPage() {
     setNewTypeName("");
   };
 
-  // 小工具：欄位驗證（需要你可以再擴充）
+  // 小工具：欄位驗證
   const validateForm = () => {
     if (!cardGameName) {
       toast.error("作品名の読込に失敗しました。ページを更新してください。");
       return false;
     }
     if (!versionName) {
-      toast.error(
-        "バージョン名の読込に失敗しました。ページを更新してください。",
-      );
+      toast.error("バージョン名の読込に失敗しました。ページを更新してください。");
       return false;
     }
     if (!cardName.trim()) {
       toast.error("カード名を入力してください。");
       return false;
     }
-    if (
-      storePrice !== "" &&
-      (isNaN(Number(storePrice)) || Number(storePrice) < 0)
-    ) {
+    if (storePrice !== "" && (isNaN(Number(storePrice)) || Number(storePrice) < 0)) {
       toast.error("店頭買取価格は0以上の数値で入力してください。");
       return false;
     }
@@ -141,10 +130,7 @@ export default function VersionDetailPage() {
       toast.error("最低買取価格は0以上の数値で入力してください。");
       return false;
     }
-    if (
-      wantedQty !== "" &&
-      (isNaN(Number(wantedQty)) || Number(wantedQty) < 0)
-    ) {
+    if (wantedQty !== "" && (isNaN(Number(wantedQty)) || Number(wantedQty) < 0)) {
       toast.error("募集枚数は0以上の数値で入力してください。");
       return false;
     }
@@ -195,15 +181,15 @@ export default function VersionDetailPage() {
     });
   };
 
-  // ===== 卡列表：監聽當前版本的卡片 =====
+  // ===== 卡列表：監聽當前版本的卡片（不排序）=====
   const [cards, setCards] = useState<CardInfo[]>([]);
   useEffect(() => {
     if (!cardGameName || !versionName) return;
     const q = query(
       collection(db, "CardInfo_Table"),
       where("cardGameName", "==", cardGameName),
-      where("versionName", "==", versionName),
-      orderBy("cardName", "asc"),
+      where("versionName", "==", versionName)
+      // 不用 orderBy，前端自己排
     );
     const unsub = onSnapshot(q, (snap) => {
       const rows: CardInfo[] = snap.docs.map((d) => ({
@@ -214,6 +200,21 @@ export default function VersionDetailPage() {
     });
     return () => unsub();
   }, [cardGameName, versionName]);
+
+  // ===== 前端排序：店頭買取価格 高→低；同價比 minPrice 高→低；再比 cardName 升冪 =====
+  const sortedCards = useMemo(() => {
+    return [...cards].sort((a, b) => {
+      const sa = typeof a.storePrice === "number" ? a.storePrice : -Infinity;
+      const sb = typeof b.storePrice === "number" ? b.storePrice : -Infinity;
+      if (sb !== sa) return sb - sa;
+
+      const ma = typeof a.minPrice === "number" ? a.minPrice : -Infinity;
+      const mb = typeof b.minPrice === "number" ? b.minPrice : -Infinity;
+      if (mb !== ma) return mb - ma;
+
+      return (a.cardName || "").localeCompare(b.cardName || "", "ja");
+    });
+  }, [cards]);
 
   if (loading) {
     return (
@@ -244,7 +245,7 @@ export default function VersionDetailPage() {
 
       {/* 卡片清單 */}
       <div className="cards-grid">
-        {cards.map((c) => (
+        {sortedCards.map((c) => (
           <Link
             key={c.id}
             to={`/admin/kaitori/${id}/version/${vid}/card/${c.id}`}
@@ -286,7 +287,7 @@ export default function VersionDetailPage() {
             </div>
           </Link>
         ))}
-        {cards.length === 0 && (
+        {sortedCards.length === 0 && (
           <div className="empty-hint">カードはまだ登録されていません</div>
         )}
       </div>
@@ -384,11 +385,7 @@ export default function VersionDetailPage() {
                             return;
                           }
                           await runWithLoading(() =>
-                            addKyara(
-                              cardGameName,
-                              versionName,
-                              newKyaraName.trim(),
-                            ),
+                            addKyara(cardGameName, versionName, newKyaraName.trim())
                           );
                           toast.success("キャラクターを追加しました。");
                           setCardKyara(newKyaraName.trim());
@@ -457,11 +454,7 @@ export default function VersionDetailPage() {
                             return;
                           }
                           await runWithLoading(() =>
-                            addType(
-                              cardGameName,
-                              versionName,
-                              newTypeName.trim(),
-                            ),
+                            addType(cardGameName, versionName, newTypeName.trim())
                           );
                           toast.success("種類を追加しました。");
                           setCardType(newTypeName.trim());
@@ -491,9 +484,7 @@ export default function VersionDetailPage() {
                     type="number"
                     value={storePrice}
                     onChange={(e) =>
-                      setStorePrice(
-                        e.target.value === "" ? "" : Number(e.target.value),
-                      )
+                      setStorePrice(e.target.value === "" ? "" : Number(e.target.value))
                     }
                     min={0}
                   />
@@ -505,9 +496,7 @@ export default function VersionDetailPage() {
                     type="number"
                     value={minPrice}
                     onChange={(e) =>
-                      setMinPrice(
-                        e.target.value === "" ? "" : Number(e.target.value),
-                      )
+                      setMinPrice(e.target.value === "" ? "" : Number(e.target.value))
                     }
                     min={0}
                   />
@@ -519,9 +508,7 @@ export default function VersionDetailPage() {
                     type="number"
                     value={wantedQty}
                     onChange={(e) =>
-                      setWantedQty(
-                        e.target.value === "" ? "" : Number(e.target.value),
-                      )
+                      setWantedQty(e.target.value === "" ? "" : Number(e.target.value))
                     }
                     min={0}
                   />

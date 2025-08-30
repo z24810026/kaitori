@@ -436,9 +436,17 @@
   color: #334155;
   font-size: var(--fs-base);
 }
-.form-row input,
-.form-row select {
-  width: 100%;
+
+.form-row select{
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-size: var(--fs-base);
+}
+
+.form-row input{
+  width: 80%;
   padding: 8px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -541,7 +549,8 @@
   grid-template-columns: repeat(var(--cols), 1fr);
   gap: var(--gutter);
   margin-top: var(--gutter);
-  align-items: stretch;
+  align-items: start;               /* 原本是 stretch -> 改成 start 比穩定 */
+  grid-auto-rows: 1fr;    
 }
 
 /* 卡片：三段式（圖 / 名稱 / 價格＋補充） */
@@ -550,7 +559,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   padding: clamp(8px, 1.1vw, 12px);
-  height: 100%;
+  
   display: grid;
   grid-template-rows: auto var(--h-name) var(--h-price-plus-note);
   align-content: start;
